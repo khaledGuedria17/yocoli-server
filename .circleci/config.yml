@@ -7,7 +7,7 @@ jobs:
     steps:
       # Enable Docker-in-Docker so we can run docker commands
       - setup_remote_docker:
-          #version: 20.10.18
+          version: default
 
       # Login to DockerHub (skip if your image is public)
       - run:
