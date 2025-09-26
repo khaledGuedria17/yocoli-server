@@ -5,7 +5,9 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-
+      # Enable Docker-in-Docker so we can run docker commands
+      - setup_remote_docker:
+      
       # Login to DockerHub (if your image is private)
       - run:
           name: Docker Login
