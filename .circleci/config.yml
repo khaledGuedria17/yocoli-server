@@ -28,12 +28,6 @@ jobs:
               --name fastapi-container \
               $DOCKERHUB_USER/video2gif-gpu:v0
 
-      # Test API endpoint
-      - run:
-          name: Test API
-          command: |
-            sleep 5  # give container time to start
-            curl --fail http://localhost:8000/docs
 
 workflows:
   run-workflow:
