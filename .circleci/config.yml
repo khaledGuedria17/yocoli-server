@@ -1,40 +1,67 @@
 version: 2.1
 
 jobs:
-  run-docker-image:
+  build-and-push:
     docker:
-      # Use Docker as executor
       - image: cimg/base:stable
     steps:
       - setup_remote_docker:
           version: 20.10.18
       - checkout
 
-      # Authenticate with DockerHub (if your image is private)
+      # Login to DockerHub
       - run:
           name: Docker Login
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
 
-      # Pull your image
+      # Build Docker image
+      - run:
+          name: Build Docker Image
+          command: docker build -t $DOCKERHUB_USER/video2gif:latest .
+
+      # Push Docker image
+      - run:
+          name: Push Docker Image
+          command: docker push $DOCKERHUB_USER/video2gif:latest
+
+  run-docker-image:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+
+      # Login to DockerHub
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+
+      # Pull image
       - run:
           name: Pull Docker Image
-          command: docker pull your-dockerhub-username/your-image:latest
+          command: docker pull $DOCKERHUB_USER/video2gif:latest
 
-      # Run the container
+      # Run container
       - run:
           name: Run Docker Container
           command: |
             docker run -d -p 8000:8000 \
               --name fastapi-container \
-              your-dockerhub-username/your-image:latest
+              $DOCKERHUB_USER/video2gif:latest
 
-      # Test if the container is running
+      # Test API endpoint
       - run:
-          name: Check Container
-          command: docker ps
+          name: Test API
+          command: |
+            sleep 5  # wait for container to start
+            curl --fail http://localhost:8000/docs
 
 workflows:
-  run-workflow:
+  build-test-deploy:
     jobs:
-      - run-docker-image
+      - build-and-push
+      - run-docker-image:
+          requires:
+            - build-and-push
