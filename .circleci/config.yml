@@ -5,8 +5,6 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
 
       # Login to DockerHub (if your image is private)
       - run:
