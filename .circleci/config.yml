@@ -1,0 +1,40 @@
+version: 2.1
+
+jobs:
+  run-docker-image:
+    docker:
+      # Use Docker as executor
+      - image: cimg/base:stable
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - checkout
+
+      # Authenticate with DockerHub (if your image is private)
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+
+      # Pull your image
+      - run:
+          name: Pull Docker Image
+          command: docker pull your-dockerhub-username/your-image:latest
+
+      # Run the container
+      - run:
+          name: Run Docker Container
+          command: |
+            docker run -d -p 8000:8000 \
+              --name fastapi-container \
+              your-dockerhub-username/your-image:latest
+
+      # Test if the container is running
+      - run:
+          name: Check Container
+          command: docker ps
+
+workflows:
+  run-workflow:
+    jobs:
+      - run-docker-image
